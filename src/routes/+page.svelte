@@ -7,7 +7,7 @@
     import PomodoroList from "./PomodoroList.svelte";
     import type {Pomodoro} from "../lib/pomodoro/pomodoro";
     import type {System} from "../lib/system";
-  import PomodoroForm from "./PomodoroForm.svelte";
+    import PomodoroForm from "./PomodoroForm.svelte";
 
     const dataConnector: ConnectorInterface = new Connector()
     let system: System | null = null
@@ -17,13 +17,6 @@
         system = dataConnector.getSystem()
         activePomodoro = dataConnector.getActivePomodoro()
     })
-    
-
-    function formatTime(time: number) : string{
-        let totalSeconds: number = parseInt(String(Math.floor(time / 1000)), 10);
-        let totalMinutes: number = parseInt(String(Math.floor(totalSeconds / 60)), 10);
-        return `${String(totalMinutes).padStart(2, "0")}:${String(totalSeconds - (totalMinutes * 60)).padStart(2, "0")}`
-    }
 
     function updatePomodoro(){
         if(system){
@@ -65,22 +58,24 @@
         {/if}
     {/await}
     
-    {#key activePomodoro}
-        <PomodoroViewer
-        title={activePomodoro ? activePomodoro.pomodoro.title : "No Active Pomodoro"}
-        currentTime={activePomodoro ? formatTime(activePomodoro.pomodoro.pomodoroTimeInMs - activePomodoro.pomodoro.currentTimeInMs) : "00:00"}
-        target={activePomodoro ? formatTime(activePomodoro.pomodoro.pomodoroTimeInMs) : "00:00"}/>
+    {#key system}
+        <PomodoroViewer callback={(data) => {}}/>
     {/key}
     
-    {#key system}
-        <PomodoroList system={system}/>
-    {/key}
+    {#if system && system.pomodoros}
+        {#key system}
+            <PomodoroList pomodoros={system.pomodoros} callback={(sys) => {
+                system = sys
+                activePomodoro=dataConnector.getActivePomodoro()
+            }}/>
+        {/key}
+    {/if}
     
     <PomodoroForm callback={(data) => {
         system = data
         activePomodoro = dataConnector.getActivePomodoro()
     }}/>
-
+<!-- 
     <button on:click={() => {
         activePomodoro = dataConnector.getActivePomodoro()
         system = dataConnector.startPomodoro(activePomodoro.id)
@@ -113,6 +108,6 @@
             system = dataConnector.deletePomodoro(activePomodoro.id)
             activePomodoro = dataConnector.getActivePomodoro()
         }
-    }} >Delete active Pomodoro</button>
+    }} >Delete active Pomodoro</button> -->
 
 </section>

@@ -2,10 +2,11 @@ import {v4 as uuid} from "uuid";
 import { ConnectorInterface } from "./connectorInterface";
 import type {Pomodoro} from "../pomodoro/pomodoro";
 import type {System} from "../system";
+import { ACTIVE_POMODORO, eraseCookie, getCookie, setCookie, SYSTEM } from "../util";
 
 
 export class Connector implements ConnectorInterface {
-    SYSTEM: string = "system"
+
     savePomodoro(data: Pomodoro) : System | null{
         let pomodoroSystem = this.getSystem()
         if(data){
@@ -15,9 +16,10 @@ export class Connector implements ConnectorInterface {
                     id = uuid()
                     for(let index = 0; index < pomodoroSystem.pomodoros.length; index++){
                         if (pomodoroSystem.pomodoros[index] && data.pomodoro.active) {
-                            pomodoroSystem.pomodoros[index].pomodoro.active = false
+                            this.deactivatePomodoro(pomodoroSystem.pomodoros[index])
                         }
                     }
+                    data.id = id
                 }
                 else {
                     for(let index = 0; index < pomodoroSystem.pomodoros.length; index++){
@@ -25,21 +27,30 @@ export class Connector implements ConnectorInterface {
                         if(pomodoroSystem.pomodoros[index] && pomodoroSystem.pomodoros[index].id == id){
                             pomodoroSystem.pomodoros.splice(index, 1)
                         }
-                        else if (pomodoroSystem.pomodoros[index] && data.pomodoro.active) {
-                            pomodoroSystem.pomodoros[index].pomodoro.active = false
+                        
+                        if (pomodoroSystem.pomodoros[index] && pomodoroSystem.pomodoros[index].id != id && data.pomodoro.active) {
+                            this.deactivatePomodoro(pomodoroSystem.pomodoros[index])
                         }
                     }
                 }
                 pomodoroSystem.pomodoros.push({ id: id, pomodoro: data.pomodoro})
             }
         }
-        this.eraseCookie(this.SYSTEM)
-        this.setCookie(this.SYSTEM, JSON.stringify(pomodoroSystem), 0)
+        eraseCookie(SYSTEM)
+        eraseCookie(ACTIVE_POMODORO)
+        setCookie(SYSTEM, JSON.stringify(pomodoroSystem), 0)
+        setCookie(ACTIVE_POMODORO, JSON.stringify(data), 0)
         return pomodoroSystem
+    }
+
+    deactivatePomodoro(pomodoro: Pomodoro) {
+        pomodoro.pomodoro.active = false
+        pomodoro.pomodoro.paused = true
+        pomodoro.pomodoro.currentTimeInMs = 0
     }
     
     getSystem() : System | null {
-        let pomodoroSystem: string | null =  this.getCookie(this.SYSTEM)
+        let pomodoroSystem: string | null =  getCookie(SYSTEM)
         let response: System | null
         if(pomodoroSystem){
             response = JSON.parse(pomodoroSystem) as System
@@ -49,7 +60,7 @@ export class Connector implements ConnectorInterface {
                 username: "Default",
                 pomodoros: []
             }
-            this.setCookie(this.SYSTEM, JSON.stringify(response), 0)
+            setCookie(SYSTEM, JSON.stringify(response), 0)
         }
         return response
     }
@@ -140,17 +151,12 @@ export class Connector implements ConnectorInterface {
     }
     
     getActivePomodoro() : Pomodoro | null{
+        let pomodoro: string | null =  getCookie(ACTIVE_POMODORO)
         let response: Pomodoro | null = null
-        let system = this.getSystem()
-        if(system) {
-            for(let index = 0; index < system.pomodoros.length; index++) {
-                if(system.pomodoros[index] 
-                    && system.pomodoros[index].pomodoro
-                    && system.pomodoros[index].pomodoro.active){
-                        response = system.pomodoros[index]
-                }
-            }
+        if(pomodoro){
+            response = JSON.parse(pomodoro) as Pomodoro
         }
+        
         return response
     }
     
@@ -170,32 +176,7 @@ export class Connector implements ConnectorInterface {
     }
     
     saveSystem(data: System) : void{
-        this.setCookie(this.SYSTEM, JSON.stringify(data), 0)
-    }
-    
-    
-    // https://stackoverflow.com/questions/14573223/set-cookie-and-get-cookie-with-javascript
-    setCookie(name: string, value: string, days: number) {
-        var expires = "";
-        if (days > 0) {
-            var date = new Date();
-            date.setTime(date.getTime() + (days*24*60*60*1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + (value || "")  + expires + "; path=/";
-    }
-    getCookie(name) : string | null{
-        var nameEQ = name + "=";
-        var ca = document.cookie.split(';');
-        for(var i=0;i < ca.length;i++) {
-            var c = ca[i];
-            while (c.charAt(0)==' ') c = c.substring(1,c.length);
-            if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-        }
-        return null;
-    }
-    eraseCookie(name) {   
-        document.cookie = name +'=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        setCookie(SYSTEM, JSON.stringify(data), 0)
     }
 }
 

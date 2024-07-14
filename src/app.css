@@ -1,6 +1,7 @@
 @import '@fontsource/fira-mono';
 
 :root {
+    /* Remove! */
 	--font-body: Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
 		Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 	--font-mono: 'Fira Mono', monospace;
@@ -14,6 +15,44 @@
 	--column-margin-top: 4rem;
 	font-family: var(--font-body);
 	color: var(--color-text);
+
+
+
+    /* Actual Css Variables */
+    --border-radius: .32rem;
+
+    --font-title-highlight-color: #d0d0d0;
+    --font-title-not-selected-color: #2888d0;
+    --font-title-border-color: #000000;
+
+    --border-light-color: #90d8f8;
+    --border-light-color-2: #4898c0;
+    --border-dark-color: #305860;
+    --border-dark-color-2: #003848;
+
+    --background-dark-color: #283840;
+
+    --text-area-label-font-color: #4838e0;
+    --text-area-label-font-border-color: #50d8f0;
+    --text-area-font-color: #d0d0d0;
+    
+	--data-area-background-color: #304858;
+    --data-area-light-border-color: #6880a0;
+
+    --stats-font-color: #f8f070;
+    --stats-font-border-color: #000000;
+    --stats-progress-bar-color: #30c8c8;
+
+    --highlight-border-color: #f8d000;
+    --highlight-border-dark-color: #b88000;
+    --highlight-border-color-2: #080808;
+}
+
+@font-face {
+    font-family: 'Digimon World';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Digimon World') format("opentype") url('/static/fonts/digimon-world.otf');
 }
 
 body {

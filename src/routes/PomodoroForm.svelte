@@ -2,6 +2,7 @@
     import type { ConnectorInterface } from "../lib/connectors/connectorInterface";
     import { Connector } from "../lib/connectors/CookieConnector"
     import type { Pomodoro } from "../lib/pomodoro/pomodoro";
+  import { ACTIVE_POMODORO, setCookie } from "../lib/util";
     export let callback: Function
     const connector: ConnectorInterface = new Connector()
 
@@ -11,7 +12,7 @@
         event.preventDefault()
         let data = new FormData(event.target)
         let pomodoro: Pomodoro = {
-            id: null,
+            id: undefined,
             pomodoro: {
                 title: String(data.get("title")),
                 active: true,
@@ -19,8 +20,8 @@
                 finished: false,
                 pomodoroTimeInMs: (Number(data.get("minutes")) * 60 * 1000) + (Number(data.get("seconds")) * 1000), 
                 currentTimeInMs: 0,
-                startTimeInEpoch: 1000000000000000,
-                lastRegisteredTimeInEpoch: 10000,
+                startTimeInEpoch: 0,
+                lastRegisteredTimeInEpoch: 0,
                 recurring: {
                     times: 3,
                     intervalInMs: 2500 // resting time
@@ -28,7 +29,13 @@
                 dificulty: "easy" // Used to define the quantity of points gained
             }
         }
+        //setActivePomodoro(pomodoro)
         callback(connector.savePomodoro(pomodoro))
+        setActivePomodoro(connector.getActivePomodoro())
+    }
+
+    function setActivePomodoro(pomodoro: Pomodoro){
+        setCookie(ACTIVE_POMODORO, JSON.stringify(pomodoro), 0)
     }
 </script>
 
