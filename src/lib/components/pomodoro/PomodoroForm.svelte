@@ -1,8 +1,8 @@
 <script lang="ts">
-    import type { ConnectorInterface } from "../lib/connectors/connectorInterface";
-    import { Connector } from "../lib/connectors/CookieConnector"
-    import type { Pomodoro } from "../lib/pomodoro/pomodoro";
-  import { ACTIVE_POMODORO, setCookie } from "../lib/util";
+    import type { ConnectorInterface } from "../../connectors/connectorInterface";
+    import { Connector } from "../../connectors/CookieConnector"
+    import type { Pomodoro } from "./data/pomodoro";
+    import { ACTIVE_POMODORO, setCookie } from "../../util";
     export let callback: Function
     const connector: ConnectorInterface = new Connector()
 
@@ -16,15 +16,19 @@
             pomodoro: {
                 title: String(data.get("title")),
                 active: true,
-                paused: false,
+                paused: true,
                 finished: false,
                 pomodoroTimeInMs: (Number(data.get("minutes")) * 60 * 1000) + (Number(data.get("seconds")) * 1000), 
                 currentTimeInMs: 0,
                 startTimeInEpoch: 0,
                 lastRegisteredTimeInEpoch: 0,
-                recurring: {
-                    times: 3,
-                    intervalInMs: 2500 // resting time
+                resting: {
+                  restingTimeInMs: 0,
+                  currentTimeInMs: 0,
+                  startTimeInEpoch: 0,
+                  lastRegisteredTimeInEpoch: 0,
+                  paused: false,
+                  finished: false
                 },
                 dificulty: "easy" // Used to define the quantity of points gained
             }

@@ -1,6 +1,6 @@
 import {v4 as uuid} from "uuid";
 import { ConnectorInterface } from "./connectorInterface";
-import type {Pomodoro} from "../pomodoro/pomodoro";
+import type {Pomodoro} from "../components/pomodoro/data/pomodoro";
 import type {System} from "../system";
 import { ACTIVE_POMODORO, eraseCookie, getCookie, setCookie, SYSTEM } from "../util";
 
@@ -56,11 +56,37 @@ export class Connector implements ConnectorInterface {
             response = JSON.parse(pomodoroSystem) as System
         }
         else {
+            // 45 minutes: 2700000
+            // 5 minutes: 900000
             response = {
                 username: "Default",
-                pomodoros: []
+                pomodoros: [
+                    {
+                        "id": "default",
+                        "pomodoro": {
+                            "title": "default",
+                            "active": true,
+                            "paused": true,
+                            "finished": false,
+                            "pomodoroTimeInMs": 1000,
+                            "currentTimeInMs": 0,
+                            "startTimeInEpoch": 0,
+                            "lastRegisteredTimeInEpoch": 0,
+                            "resting": {
+                                "finished": false,
+                                "paused": true,
+                                "restingTimeInMs": 2000,
+                                "currentTimeInMs": 0,
+                                "startTimeInEpoch": 0,
+                                "lastRegisteredTimeInEpoch": 0
+                            },
+                            "dificulty": "easy"
+                        }
+                    }
+                ]
             }
             setCookie(SYSTEM, JSON.stringify(response), 0)
+            setCookie(ACTIVE_POMODORO, JSON.stringify(response.pomodoros[0]), 0)
         }
         return response
     }
@@ -81,6 +107,26 @@ export class Connector implements ConnectorInterface {
             data.pomodoro.finished = false
             data.pomodoro.startTimeInEpoch = Date.now()
             data.pomodoro.lastRegisteredTimeInEpoch = data.pomodoro.startTimeInEpoch
+            if (data.pomodoro.resting) {
+                data.pomodoro.currentTimeInMs = 0
+                data.pomodoro.resting.startTimeInEpoch = Date.now()
+                data.pomodoro.resting.lastRegisteredTimeInEpoch = data.pomodoro.startTimeInEpoch
+            }
+            return this.savePomodoro(data)
+        }
+        return this.getSystem()
+    }
+
+    startPomodoroResting(pomodoroId: string) : System | null{
+        let data = this.getPomodoroById(pomodoroId)
+        if (data){
+            if (data.pomodoro.resting) {
+                data.pomodoro.resting.paused = false
+                data.pomodoro.resting.finished = false
+                data.pomodoro.resting.currentTimeInMs = 0
+                data.pomodoro.resting.startTimeInEpoch = Date.now()
+                data.pomodoro.resting.lastRegisteredTimeInEpoch = data.pomodoro.resting.startTimeInEpoch
+            }
             return this.savePomodoro(data)
         }
         return this.getSystem()
@@ -90,6 +136,15 @@ export class Connector implements ConnectorInterface {
         let data = this.getPomodoroById(pomodoroId)
         if (data){
             data.pomodoro.paused = true
+            return this.savePomodoro(data)
+        }
+        return this.getSystem()
+    }
+
+    pausePomodoroResting(pomodoroId: string) : System | null{
+        let data = this.getPomodoroById(pomodoroId)
+        if (data){
+            data.pomodoro.resting.paused = true
             return this.savePomodoro(data)
         }
         return this.getSystem()
@@ -105,6 +160,17 @@ export class Connector implements ConnectorInterface {
         }
         return this.getSystem()
     }
+
+    unpausePomodoroResting(pomodoroId: string) : System | null{
+        let data = this.getPomodoroById(pomodoroId)
+        if (data){
+            data.pomodoro.resting.paused = false
+            data.pomodoro.resting.startTimeInEpoch = Date.now()
+            data.pomodoro.resting.lastRegisteredTimeInEpoch = data.pomodoro.startTimeInEpoch
+            return this.savePomodoro(data)
+        }
+        return this.getSystem()
+    }
     
     resetPomodoro(pomodoroId: string) : System | null{
         let data = this.getPomodoroById(pomodoroId)
@@ -114,6 +180,22 @@ export class Connector implements ConnectorInterface {
             data.pomodoro.currentTimeInMs = 0
             data.pomodoro.startTimeInEpoch = Date.now()
             data.pomodoro.lastRegisteredTimeInEpoch = data.pomodoro.startTimeInEpoch
+            data.pomodoro.resting.currentTimeInMs = 0
+            data.pomodoro.resting.lastRegisteredTimeInEpoch = 0
+            data.pomodoro.resting.startTimeInEpoch = Date.now()
+            data.pomodoro.resting.lastRegisteredTimeInEpoch = data.pomodoro.startTimeInEpoch
+            return this.savePomodoro(data)
+        }
+        return this.getSystem()
+    }
+
+    resetPomodoroResting(pomodoroId: string) : System | null{
+        let data = this.getPomodoroById(pomodoroId)
+        if (data){
+            data.pomodoro.resting.currentTimeInMs = 0
+            data.pomodoro.resting.lastRegisteredTimeInEpoch = 0
+            data.pomodoro.resting.startTimeInEpoch = Date.now()
+            data.pomodoro.resting.lastRegisteredTimeInEpoch = data.pomodoro.resting.startTimeInEpoch
             return this.savePomodoro(data)
         }
         return this.getSystem()
@@ -129,6 +211,24 @@ export class Connector implements ConnectorInterface {
                     data.pomodoro.paused = true
                     data.pomodoro.finished = true
                     data.pomodoro.currentTimeInMs = data.pomodoro.pomodoroTimeInMs
+                }
+                return this.savePomodoro(data)
+            }
+        }
+    
+        return this.getSystem()
+    }
+
+    updateRestingTimer(pomodoroId: string) : System | null{
+        let data = this.getPomodoroById(pomodoroId)
+        if (data) {
+            if(data.pomodoro.resting && !data.pomodoro.resting.paused && !data.pomodoro.resting.finished){
+                data.pomodoro.resting.currentTimeInMs += Math.floor((Date.now() - data.pomodoro.resting.lastRegisteredTimeInEpoch))
+                data.pomodoro.resting.lastRegisteredTimeInEpoch = Date.now()
+                if(data.pomodoro.resting.restingTimeInMs <= data.pomodoro.resting.currentTimeInMs){
+                    data.pomodoro.resting.paused = true
+                    data.pomodoro.resting.finished = true
+                    data.pomodoro.resting.currentTimeInMs = data.pomodoro.resting.restingTimeInMs
                 }
                 return this.savePomodoro(data)
             }
@@ -158,6 +258,21 @@ export class Connector implements ConnectorInterface {
         }
         
         return response
+    }
+
+    setRestingState(pomodoroId: string) : System | null {
+        let data = this.getPomodoroById(pomodoroId)
+        if (data) {
+            if(data.pomodoro.resting){
+                data.pomodoro.finished = true
+                data.pomodoro.resting.paused = true
+                data.pomodoro.resting.finished = false
+                data.pomodoro.resting.currentTimeInMs = 0
+                return this.savePomodoro(data)
+            }
+        }
+    
+        return this.getSystem()
     }
     
     deletePomodoro(id: string): System | null{

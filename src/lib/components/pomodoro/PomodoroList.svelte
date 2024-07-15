@@ -1,9 +1,8 @@
 <script lang="ts">
-    import type { ConnectorInterface } from "../lib/connectors/connectorInterface";
-    import { Connector } from "../lib/connectors/CookieConnector"
-    import type { Pomodoro } from "../lib/pomodoro/pomodoro";
-    import { System } from "../lib/system";
-    import { formatTime } from "../lib/util"
+    import type { ConnectorInterface } from "../../connectors/connectorInterface";
+    import { Connector } from "../../connectors/CookieConnector"
+    import type { Pomodoro } from "./data/pomodoro";
+    import { formatTime } from "../../util"
     export let pomodoros: Pomodoro[], callback: Function
 
     const connector: ConnectorInterface = new Connector()

@@ -1,4 +1,4 @@
-import {Pomodoro} from "./pomodoro/pomodoro"
+import {Pomodoro} from "./components/pomodoro/data/pomodoro"
 
 export class System {
     username: string

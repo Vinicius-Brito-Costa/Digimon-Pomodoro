@@ -1,4 +1,4 @@
-import {Recurring} from "./recurring"
+import {Resting} from "./resting"
 
 export interface PomodoroData {
     title: string | null
@@ -9,6 +9,6 @@ export interface PomodoroData {
     currentTimeInMs: number
     startTimeInEpoch: number
     lastRegisteredTimeInEpoch: number
-    recurring: Recurring
+    resting: Resting
     dificulty: string
 }
