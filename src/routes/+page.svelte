@@ -9,10 +9,9 @@
     const dataConnector: ConnectorInterface = new Connector()
     let system: System | null = null
 
-    onMount(() => {
-        system = dataConnector.getSystem()
+    onMount(async () => {
+        system = await dataConnector.getSystem()
     })
-
 </script>
 
 <svelte:head>
@@ -42,7 +41,7 @@
     <div class="container">
         {#key system}
             <DigimonViewer/>
-            <PomodoroViewer/>
+            <PomodoroViewer callback={(sys) => system = sys}/>
         {/key}
     </div>
 </section>

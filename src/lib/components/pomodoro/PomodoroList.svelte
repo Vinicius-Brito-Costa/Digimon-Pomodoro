@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { ConnectorInterface } from "../../connectors/connectorInterface";
     import { Connector } from "../../connectors/CookieConnector"
-    import type { Pomodoro } from "./data/pomodoro";
+    import {Pomodoro} from "./data/pomodoro";
     import { formatTime } from "../../util"
     export let pomodoros: Pomodoro[], callback: Function
 

@@ -2,26 +2,47 @@
     import { onMount } from "svelte";
     import type { ConnectorInterface } from "../../connectors/connectorInterface";
     import { Connector } from "../../connectors/CookieConnector";
-    import type { Pomodoro } from "./data/pomodoro";
+    import {Pomodoro} from "./data/pomodoro";
     import { formatTime, formatTimeSeparated } from "../../util";
+    import { getRandomEvolution } from "../../requestHandler";
+    import Digimon from "../digimon/data/digimon";
+    export let callback: Function
 
     const connector: ConnectorInterface = new Connector()
     let activePomodoro: Pomodoro | null = null
 
-    onMount(() => {
+    onMount(async () => {
         activePomodoro = connector.getActivePomodoro()
     })
 
 
     function updatePomodoro(){
         if(activePomodoro){
-            let timer = setInterval(function () {
+            let timer = setInterval(async () => {
                 activePomodoro = connector.getActivePomodoro();
                 if(activePomodoro && activePomodoro.pomodoro && activePomodoro.pomodoro.active && !activePomodoro.pomodoro.paused){
-                    connector.updateTimer(activePomodoro.id)
+                    await connector.updateTimer(activePomodoro.id).then(res => {
+                        activePomodoro = connector.getActivePomodoro()
+                    })
                 }
                 else {
-                    //TODO: ADD EVOLUTIONS
+                    await connector.getSystem().then(async system => {
+                        if(system && system.digimon){
+                            await getRandomEvolution(system.digimon.name).then(result => {
+                                if(result){
+                                    let next: Digimon = new Digimon()
+                                    next.name = result
+                                    system.digimon = next
+                                    if(!system.digimonDictionary.find((digi) => digi.name == result)){
+                                        system.digimonDictionary.push(next)
+                                    }
+                                    connector.saveSystem(system)
+                                    callback(system)
+                                }
+                            })
+                        }
+                    })
+                    activePomodoro = connector.getActivePomodoro()
                     clearInterval(timer)
                 }
                 activePomodoro = connector.getActivePomodoro();
@@ -29,21 +50,21 @@
         }
     }
 
-    function updatePomodoroResting(){
+    async function updatePomodoroResting(){
         if(activePomodoro){
-            let timer = setInterval(function () {
+            let timer = setInterval(async function () {
                 activePomodoro = connector.getActivePomodoro();
                 if(activePomodoro && activePomodoro.pomodoro 
                     && activePomodoro.pomodoro.resting 
                     && !activePomodoro.pomodoro.resting.finished 
                     && !activePomodoro.pomodoro.resting.paused){
-                    connector.updateRestingTimer(activePomodoro.id)
+                    await connector.updateRestingTimer(activePomodoro.id)
                 }
                 else {
                     // Set Resting Active
                     if(activePomodoro.pomodoro.resting.finished){
-                        connector.resetPomodoroResting(activePomodoro.id)
-                        connector.resetPomodoro(activePomodoro.id)
+                        await connector.resetPomodoroResting(activePomodoro.id)
+                        await connector.resetPomodoro(activePomodoro.id)
                     }
                     clearInterval(timer)
                 }
@@ -52,20 +73,16 @@
         }
     }
 
-    function beforeUnload(event) {
+    async function beforeUnload(event) {
         if (activePomodoro) {
-            event.preventDefault();
             event.returnValue = '';
-            connector.pausePomodoro(activePomodoro.id)
+            await connector.pausePomodoro(activePomodoro.id)
             activePomodoro = connector.getActivePomodoro()
             return '';
         }
   }
 </script>
 <style>
-    button {
-        background: none;
-    }
     .viewer-buttons:hover{
         cursor: pointer;
     }
@@ -232,65 +249,68 @@
         <div class="player-functions container">
             {#if activePomodoro}
                 {#if !activePomodoro.pomodoro.finished}
-                    <button on:click={() => {
-                        connector.setRestingState(activePomodoro.id)
-                        activePomodoro = connector.getActivePomodoro()
+                    <button on:click={async () => {
+                        await connector.setRestingState(activePomodoro.id).then(res => {
+                            activePomodoro = connector.getActivePomodoro()
+                        })
                     }} class="viewer-buttons backward"><img src="/images/forward.png" alt="Backward Button"/></button>
                     {#if activePomodoro.pomodoro.paused && activePomodoro.pomodoro.currentTimeInMs == 0}
-                        <button on:click={() => {
-                            connector.startPomodoro(activePomodoro.id)
-                            updatePomodoro()
+                        <button on:click={async (e) => {
+                            await connector.startPomodoro(activePomodoro.id).then(res => {
+                                activePomodoro = connector.getActivePomodoro()
+                                updatePomodoro()
+                            })
                         }} class="viewer-buttons"><img src="/images/play_pause_active.png" alt="Play Button"/></button>
                     {:else if !activePomodoro.pomodoro.paused}
-                        <button on:click={() => {
-                            let system = connector.pausePomodoro(activePomodoro.id)
+                        <button on:click={async () => {
+                            let system = await connector.pausePomodoro(activePomodoro.id)
                             activePomodoro = connector.getActivePomodoro()
                             system
                         }} class="viewer-buttons"><img src="/images/play_pause_inactive.png" alt="Stop Button"/></button>
                     {:else if activePomodoro.pomodoro.paused && activePomodoro.pomodoro.currentTimeInMs > 0 && activePomodoro.pomodoro.currentTimeInMs != activePomodoro.pomodoro.pomodoroTimeInMs}
-                        <button on:click={() => {
-                            connector.unpausePomodoro(activePomodoro.id)
+                        <button on:click={async () => {
+                            await connector.unpausePomodoro(activePomodoro.id)
                             updatePomodoro()
                         }} class="viewer-buttons"><img src="/images/play_pause_active.png" alt="Resume Button"/></button>
-                        <button on:click={() => {
-                            connector.resetPomodoro(activePomodoro.id)
+                        <button on:click={async () => {
+                            await connector.resetPomodoro(activePomodoro.id)
                             activePomodoro = connector.getActivePomodoro()
                         }} class="viewer-buttons"><img src="/images/reset.png" alt="Reset Button"/></button>
                     {/if}
-                    <button on:click={() => {
-                        connector.setRestingState(activePomodoro.id)
+                    <button on:click={async () => {
+                        await connector.setRestingState(activePomodoro.id)
                         activePomodoro = connector.getActivePomodoro()
                     }} class="viewer-buttons"><img src="/images/forward.png" alt="Forward Button"/></button>
                 {:else}
-                    <button on:click={() => {
-                        connector.resetPomodoro(activePomodoro.id)
-                        connector.resetPomodoroResting(activePomodoro.id)
+                    <button on:click={async () => {
+                        await connector.resetPomodoro(activePomodoro.id)
+                        await connector.resetPomodoroResting(activePomodoro.id)
                         activePomodoro = connector.getActivePomodoro()
                     }} class="viewer-buttons backward"><img src="/images/forward.png" alt="Backward Button"/></button>
                     {#if activePomodoro.pomodoro.resting.paused && activePomodoro.pomodoro.resting.currentTimeInMs == 0}
-                        <button on:click={() => {
-                            connector.startPomodoroResting(activePomodoro.id)
+                        <button on:click={async () => {
+                            await connector.startPomodoroResting(activePomodoro.id)
                             updatePomodoroResting()
                         }} class="viewer-buttons"><img src="/images/play_pause_active.png" alt="Play Button"/></button>
                     {:else if !activePomodoro.pomodoro.resting.paused}
-                        <button on:click={() => {
-                            let system = connector.pausePomodoroResting(activePomodoro.id)
+                        <button on:click={async () => {
+                            let system = await connector.pausePomodoroResting(activePomodoro.id)
                             activePomodoro = connector.getActivePomodoro()
                             system
                         }} class="viewer-buttons"><img src="/images/play_pause_inactive.png" alt="Stop Button"/></button>
                     {:else if activePomodoro.pomodoro.resting.paused && activePomodoro.pomodoro.resting.currentTimeInMs > 0 && activePomodoro.pomodoro.resting.currentTimeInMs != activePomodoro.pomodoro.resting.restingTimeInMs}
-                        <button on:click={() => {
-                            connector.unpausePomodoroResting(activePomodoro.id)
+                        <button on:click={async () => {
+                            await connector.unpausePomodoroResting(activePomodoro.id)
                             updatePomodoroResting()
                         }} class="viewer-buttons"><img src="/images/play_pause_active.png" alt="Resume Button"/></button>
-                        <button on:click={() => {
-                            connector.resetPomodoroResting(activePomodoro.id)
+                        <button on:click={async () => {
+                            await connector.resetPomodoroResting(activePomodoro.id)
                             activePomodoro = connector.getActivePomodoro()
                         }} class="viewer-buttons"><img src="/images/reset.png" alt="Reset Button"/></button>
                     {/if}
-                    <button on:click={() => {
-                        connector.resetPomodoroResting(activePomodoro.id)
-                        connector.resetPomodoro(activePomodoro.id)
+                    <button on:click={async () => {
+                        await connector.resetPomodoroResting(activePomodoro.id)
+                        await connector.resetPomodoro(activePomodoro.id)
                         activePomodoro = connector.getActivePomodoro()
                     }} class="viewer-buttons"><img src="/images/forward.png" alt="Forward Button"/></button>
                 {/if}

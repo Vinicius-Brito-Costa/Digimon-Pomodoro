@@ -1,6 +1,6 @@
 import { PomodoroData } from "./pomodoroData"
 
-export interface Pomodoro {
+export class Pomodoro {
     id: string | null
     pomodoro: PomodoroData
 }
