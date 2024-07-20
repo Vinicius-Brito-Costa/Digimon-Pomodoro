@@ -65,9 +65,6 @@ export class Connector implements ConnectorInterface {
                 resolve(Object.assign(new System(), JSON.parse(pomodoroSystem)))
             }
             else {
-                
-                // 45 minutes: 2700000
-                // 5 minutes: 900000
                 resolve(await getRandomBabyIDigimon().then(res => {
                     let sys: System = new System()
                     sys.username = "default"
@@ -82,14 +79,14 @@ export class Connector implements ConnectorInterface {
                             "active": true,
                             "paused": true,
                             "finished": false,
-                            "pomodoroTimeInMs": 1000,
+                            "pomodoroTimeInMs": 1800000,
                             "currentTimeInMs": 0,
                             "startTimeInEpoch": 0,
                             "lastRegisteredTimeInEpoch": 0,
                             "resting": {
                                 "finished": false,
                                 "paused": true,
-                                "restingTimeInMs": 2000,
+                                "restingTimeInMs": 900000,
                                 "currentTimeInMs": 0,
                                 "startTimeInEpoch": 0,
                                 "lastRegisteredTimeInEpoch": 0

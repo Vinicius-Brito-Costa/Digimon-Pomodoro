@@ -26,22 +26,24 @@
                     })
                 }
                 else {
-                    await connector.getSystem().then(async system => {
-                        if(system && system.digimon){
-                            await getRandomEvolution(system.digimon.name).then(result => {
-                                if(result){
-                                    let next: Digimon = new Digimon()
-                                    next.name = result
-                                    system.digimon = next
-                                    if(!system.digimonDictionary.find((digi) => digi.name == result)){
-                                        system.digimonDictionary.push(next)
+                    if(activePomodoro.pomodoro.finished){
+                        await connector.getSystem().then(async system => {
+                            if(system && system.digimon){
+                                await getRandomEvolution(system.digimon.name).then(result => {
+                                    if(result){
+                                        let next: Digimon = new Digimon()
+                                        next.name = result
+                                        system.digimon = next
+                                        if(!system.digimonDictionary.find((digi) => digi.name == result)){
+                                            system.digimonDictionary.push(next)
+                                        }
+                                        connector.saveSystem(system)
+                                        callback(system)
                                     }
-                                    connector.saveSystem(system)
-                                    callback(system)
-                                }
-                            })
-                        }
-                    })
+                                })
+                            }
+                        })
+                    }
                     activePomodoro = connector.getActivePomodoro()
                     clearInterval(timer)
                 }
@@ -80,14 +82,30 @@
             activePomodoro = connector.getActivePomodoro()
             return '';
         }
-  }
+    }
+    function getProgressBarPercentage(){
+        if(activePomodoro && activePomodoro.pomodoro){
+            if(!activePomodoro.pomodoro.finished){
+                return `${activePomodoro.pomodoro.currentTimeInMs / (activePomodoro.pomodoro.pomodoroTimeInMs / 100)}%`
+            }
+            else {
+                return `${activePomodoro.pomodoro.resting.currentTimeInMs / (activePomodoro.pomodoro.resting.restingTimeInMs / 100)}%`
+            }
+        }
+        else {
+            return "0%"
+        }
+    }
 </script>
 <style>
+    .viewer-buttons {
+        border-width: var(--button-border-width-w1920);
+    }
     .viewer-buttons:hover{
         cursor: pointer;
     }
     .viewer-buttons img {
-        height: 40px;
+        height: var(--icon-size-height-w1920);
         image-rendering: pixelated;
         padding: 5px;
     }
@@ -101,14 +119,14 @@
     }
     .container-border {
         background-color: var(--border-light-color-2);
-        border: solid 2px var(--stats-font-border-color);
-        padding: 3px;
+        border: solid var(--border-width-minor-w1920) var(--stats-font-border-color);
+        padding: var(--border-padding-w1920);
         height: 100%;
     }
     .container {
         color: var(--stats-font-color);
         background-color: var(--background-dark-color);
-        border: solid 2px var(--stats-font-border-color);
+        border: solid var(--border-width-minor-w1920) var(--stats-font-border-color);
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -121,21 +139,21 @@
     .time-container-border {
         border-bottom: 0;
         border-left: 0;
-        border-top-right-radius: var(--border-radius);
-        padding: 3px 3px 0px 3px;
+        border-top-right-radius: var(--border-radius-w1920);
+        padding: var(--border-padding-w1920) var(--border-padding-w1920) 0px var(--border-padding-w1920);
         flex: 4;
     }
     .player-functions-border {
         border-top: 0;
         border-left: 0;
-        padding: 0px 3px 3px 3px;
-        border-bottom-right-radius: var(--border-radius);
+        padding: 0px var(--border-padding-w1920) var(--border-padding-w1920) var(--border-padding-w1920);
+        border-bottom-right-radius: var(--border-radius-w1920);
         display: flex;
         flex: 2;
     }
     .time-container {
         border-bottom: 0;
-        border-top-right-radius: var(--border-radius);
+        border-top-right-radius: var(--border-radius-w1920);
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -149,7 +167,7 @@
         flex-direction: row;
         justify-content: center;
         align-items: start;
-        border-bottom-right-radius: var(--border-radius);
+        border-bottom-right-radius: var(--border-radius-w1920);
     }
     .progress-bar-border {
         border-top: 0;
@@ -169,18 +187,19 @@
         background-color: var(--data-area-background-color);
         height: 15px;
         width: 90%;
-        border-radius: var(--border-radius);
-        border: solid 2px var(--stats-font-border-color);
+        padding: 3px 10px;
+        border-radius: var(--border-radius-w1920);
+        border: solid var(--border-width-minor-w1920) var(--stats-font-border-color);
         display: flex;
         align-items: center;
     }
     .progress-bar {
         background-color: var(--border-light-color-2);
-        margin-left: 5%;
+        margin: 0 10px;
         height: 5px;
-        width: 70%;
     }
     .time-container h1 {
+        font-size: var(--font-size-title-w1920);
         text-shadow: 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black, 0 0 1px black;
     }
     .time-container h2 {
@@ -189,11 +208,11 @@
         padding-left: 5px; 
     }
     .time-container .full-time {
-        font-size: 20px;
+        font-size: var(--font-size-clock-full-time-w1920);
         color: var(--font-title-highlight-color);
     }
     .time-container .current-time-min {
-        font-size: 120px;
+        font-size: var(--font-size-clock-min-w1920);
         color: var(--font-title-highlight-color);
         margin-top: 10px;
         margin-bottom: 5px;
@@ -201,7 +220,7 @@
 
     .time-container .current-time-sec {
         flex: 1;
-        font-size: 70px;
+        font-size: var(--font-size-clock-sec-w1920);
         color: var(--font-title-highlight-color);
     }
 
@@ -211,6 +230,91 @@
     }
 
     /* POMODORO TIMER */
+
+    @media (max-width: 1070px) {
+        .viewer-container {
+            height: 50%;
+            width: 100%;
+            display: flex;
+        }
+        .container-border {
+            height: 50%;
+        }
+        .time-container-border {
+            border-top: 0px;
+            padding-top: calc(var(--border-padding-w1070) / 2);
+            border-left: solid var(--border-width-minor-w1920) var(--stats-font-border-color);
+            border-top-right-radius: 0;
+            height: auto;
+        }
+        .time-container{
+            border-top-right-radius: 0;
+            padding: 0;
+        }
+
+        .time-container h1 {
+            font-size: var(--font-size-title-w1070);
+            margin: 0;
+            margin-top: 5px;
+        }
+
+        .time-container .full-time {
+            font-size: var(--font-size-clock-full-time-w1070);
+        }
+        .time-container .current-time-min {
+            font-size: var(--font-size-clock-min-w1070);
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+
+        .time-container .current-time-sec {
+            flex: 1;
+            font-size: var(--font-size-clock-sec-w1070);
+        }
+        .progress-bar-border {
+            padding-bottom: 5px;
+            height: auto;
+            border-left: solid var(--border-width-minor-w1920) var(--stats-font-border-color);
+        }
+        .progress-bar-border-2 {
+            height: 100%;
+            padding: 3px;
+        }
+        .progress-bar-spacer {
+            height: 10px;
+            width: 80%;
+            padding: 1px 10px;
+        }
+        .player-functions-border {
+            height: auto;
+            border-left: solid var(--border-width-minor-w1920) var(--stats-font-border-color);
+            border-bottom-left-radius: var(--border-radius-w1070);
+        }
+        .player-functions {
+            width: 100%;
+            border-top: 0;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: start;
+            border-bottom-left-radius: var(--border-radius-w1070);
+            padding-top: 0;
+            padding-bottom: 2px;
+        }
+        .viewer-buttons {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            width: var(--icon-size-width-w1070);
+        }
+        
+        .viewer-buttons img {
+            height: var(--icon-size-height-w1070);
+            image-rendering: pixelated;
+            padding: 0;
+        }
+    }
 </style>
 
 
@@ -240,7 +344,7 @@
         <div class="progress-bar-border container-border">
             <div class="progress-bar-border-2 container">
                 <div class="progress-bar-spacer">
-                    <div class="progress-bar"></div>
+                    <div class="progress-bar" style="width: {getProgressBarPercentage()};"></div>
                 </div>
             </div>
         </div>

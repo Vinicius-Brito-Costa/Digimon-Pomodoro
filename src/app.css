@@ -1,12 +1,11 @@
 :root {
     /* Actual Css Variables */
-    --border-radius: .32rem;
 
     --font-title-highlight-color: #d0d0d0;
     --font-title-not-selected-color: #2888d0;
     --font-title-border-color: #000000;
 
-    --border-light-color: #90d8f8;
+    --border-light-color: #80e8f8;
     --border-light-color-2: #4898c0;
     --border-dark-color: #305860;
     --border-dark-color-2: #003848;
@@ -27,6 +26,35 @@
     --highlight-border-color: #f8d000;
     --highlight-border-dark-color: #b88000;
     --highlight-border-color-2: #080808;
+
+    --max-witdh-w1920: 900px;
+    --max-height-w1920: 600px;
+
+    --border-radius-w1920: .80rem;
+    --border-width-w1920: 5px;
+    --border-width-minor-w1920: 3px;
+    --border-padding-w1920: 8px;
+    --font-size-title-w1920: 45px;
+    --font-size-clock-full-time-w1920: 40px;
+    --font-size-clock-min-w1920: 150px;
+    --font-size-clock-sec-w1920: 100px;
+    --icon-size-height-w1920: 70px;
+    --button-border-width-w1920: 5px;
+    
+    --max-witdh-w1070: 80%;
+    --max-height-w1070: 90%;
+
+    --border-radius-w1070: .80rem;
+    --border-width-w1070: 5px;
+    --border-width-minor-w1070: 3px;
+    --border-padding-w1070: 8px;
+    --font-size-title-w1070: 25px;
+    --font-size-clock-full-time-w1070: 20px;
+    --font-size-clock-min-w1070: 80px;
+    --font-size-clock-sec-w1070: 30px;
+    --icon-size-height-w1070: 40px;
+    --icon-size-width-w1070: 40px;
+    --button-border-width-w1070: 5px;
 }
 
 @font-face {
@@ -45,3 +73,30 @@ body {
 button {
     background: none;
 }
+
+/* width */
+::-webkit-scrollbar {
+    border-radius: var(--border-radius-w1920);
+    width: 10px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    border-radius: var(--border-radius-w1920);
+    background: #00000041; 
+  }
+   
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    border-top-right-radius: var(--border-radius-w1920);
+    border-bottom-right-radius: var(--border-radius-w1920);
+    border-top-left-radius: calc(var(--border-radius-w1920) / 3);
+    border-bottom-left-radius: calc(var(--border-radius-w1920) / 3);
+    background: var(--font-title-highlight-color); 
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--border-light-color); 
+    cursor: pointer;
+  }

@@ -11,7 +11,7 @@ export function getDigimonByName(name){
 }
 
 export function buildDigimonImageURLByName(name){
-    return DIGIMON_API_BASE_PATH + ENDPOINTS.IMAGE + "/" + name + PNG_EXT
+    return DIGIMON_API_BASE_PATH + ENDPOINTS.IMAGE + "/" + name.replaceAll(" ", "_") + PNG_EXT
 }
 
 function getDigimonList(query){
