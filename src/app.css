@@ -61,7 +61,8 @@
     font-family: 'Digimon World';
     font-style: normal;
     font-weight: 400;
-    src: local('Digimon World') format("opentype") url('/static/fonts/digimon-world.otf');
+    src: local('Digimon World') format("opentype") url('/static/fonts/digimon-world.otf'),
+        local('Digimon World') format("opentype") url('/Digimon-Pomodoro/fonts/digimon-world.otf');
 }
 
 body {

@@ -6,6 +6,7 @@
     import { getDigimonByName, getRandomBabyIDigimon } from "../../requestHandler"
     import { System } from "../../system";
     import Digimon from "./data/digimon";
+    import { base } from '$app/paths'
     export let callback: Function
     const connector: ConnectorInterface = new Connector()
     let system: System | null = null
@@ -172,7 +173,7 @@
                                     system = result
                                     callback(system)
                                 }
-                            }} class="reset-button"><img src="/images/reset.png" alt="Reset Button"/></button>
+                            }} class="reset-button"><img src="{base}/images/reset.png" alt="Reset Button"/></button>
                             <img src={digimon.images[0].href} alt={digimon.name}/>
                         </div>
                         <h1>{digimon.name}</h1>

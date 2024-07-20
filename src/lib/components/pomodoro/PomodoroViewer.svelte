@@ -6,6 +6,7 @@
     import { formatTime, formatTimeSeparated } from "../../util";
     import { getRandomEvolution } from "../../requestHandler";
     import Digimon from "../digimon/data/digimon";
+    import { base } from '$app/paths'
     export let callback: Function
 
     const connector: ConnectorInterface = new Connector()
@@ -357,70 +358,70 @@
                         await connector.setRestingState(activePomodoro.id).then(res => {
                             activePomodoro = connector.getActivePomodoro()
                         })
-                    }} class="viewer-buttons backward"><img src="/images/forward.png" alt="Backward Button"/></button>
+                    }} class="viewer-buttons backward"><img src="{base}/images/forward.png" alt="Backward Button"/></button>
                     {#if activePomodoro.pomodoro.paused && activePomodoro.pomodoro.currentTimeInMs == 0}
                         <button on:click={async (e) => {
                             await connector.startPomodoro(activePomodoro.id).then(res => {
                                 activePomodoro = connector.getActivePomodoro()
                                 updatePomodoro()
                             })
-                        }} class="viewer-buttons"><img src="/images/play_pause_active.png" alt="Play Button"/></button>
+                        }} class="viewer-buttons"><img src="{base}/images/play_pause_active.png" alt="Play Button"/></button>
                     {:else if !activePomodoro.pomodoro.paused}
                         <button on:click={async () => {
                             let system = await connector.pausePomodoro(activePomodoro.id)
                             activePomodoro = connector.getActivePomodoro()
                             system
-                        }} class="viewer-buttons"><img src="/images/play_pause_inactive.png" alt="Stop Button"/></button>
+                        }} class="viewer-buttons"><img src="{base}/images/play_pause_inactive.png" alt="Stop Button"/></button>
                     {:else if activePomodoro.pomodoro.paused && activePomodoro.pomodoro.currentTimeInMs > 0 && activePomodoro.pomodoro.currentTimeInMs != activePomodoro.pomodoro.pomodoroTimeInMs}
                         <button on:click={async () => {
                             await connector.unpausePomodoro(activePomodoro.id)
                             updatePomodoro()
-                        }} class="viewer-buttons"><img src="/images/play_pause_active.png" alt="Resume Button"/></button>
+                        }} class="viewer-buttons"><img src="{base}/images/play_pause_active.png" alt="Resume Button"/></button>
                         <button on:click={async () => {
                             await connector.resetPomodoro(activePomodoro.id)
                             activePomodoro = connector.getActivePomodoro()
-                        }} class="viewer-buttons"><img src="/images/reset.png" alt="Reset Button"/></button>
+                        }} class="viewer-buttons"><img src="{base}/images/reset.png" alt="Reset Button"/></button>
                     {/if}
                     <button on:click={async () => {
                         await connector.setRestingState(activePomodoro.id)
                         activePomodoro = connector.getActivePomodoro()
-                    }} class="viewer-buttons"><img src="/images/forward.png" alt="Forward Button"/></button>
+                    }} class="viewer-buttons"><img src="{base}/images/forward.png" alt="Forward Button"/></button>
                 {:else}
                     <button on:click={async () => {
                         await connector.resetPomodoro(activePomodoro.id)
                         await connector.resetPomodoroResting(activePomodoro.id)
                         activePomodoro = connector.getActivePomodoro()
-                    }} class="viewer-buttons backward"><img src="/images/forward.png" alt="Backward Button"/></button>
+                    }} class="viewer-buttons backward"><img src="{base}/images/forward.png" alt="Backward Button"/></button>
                     {#if activePomodoro.pomodoro.resting.paused && activePomodoro.pomodoro.resting.currentTimeInMs == 0}
                         <button on:click={async () => {
                             await connector.startPomodoroResting(activePomodoro.id)
                             updatePomodoroResting()
-                        }} class="viewer-buttons"><img src="/images/play_pause_active.png" alt="Play Button"/></button>
+                        }} class="viewer-buttons"><img src="{base}/images/play_pause_active.png" alt="Play Button"/></button>
                     {:else if !activePomodoro.pomodoro.resting.paused}
                         <button on:click={async () => {
                             let system = await connector.pausePomodoroResting(activePomodoro.id)
                             activePomodoro = connector.getActivePomodoro()
                             system
-                        }} class="viewer-buttons"><img src="/images/play_pause_inactive.png" alt="Stop Button"/></button>
+                        }} class="viewer-buttons"><img src="{base}/images/play_pause_inactive.png" alt="Stop Button"/></button>
                     {:else if activePomodoro.pomodoro.resting.paused && activePomodoro.pomodoro.resting.currentTimeInMs > 0 && activePomodoro.pomodoro.resting.currentTimeInMs != activePomodoro.pomodoro.resting.restingTimeInMs}
                         <button on:click={async () => {
                             await connector.unpausePomodoroResting(activePomodoro.id)
                             updatePomodoroResting()
-                        }} class="viewer-buttons"><img src="/images/play_pause_active.png" alt="Resume Button"/></button>
+                        }} class="viewer-buttons"><img src="{base}/images/play_pause_active.png" alt="Resume Button"/></button>
                         <button on:click={async () => {
                             await connector.resetPomodoroResting(activePomodoro.id)
                             activePomodoro = connector.getActivePomodoro()
-                        }} class="viewer-buttons"><img src="/images/reset.png" alt="Reset Button"/></button>
+                        }} class="viewer-buttons"><img src="{base}/images/reset.png" alt="Reset Button"/></button>
                     {/if}
                     <button on:click={async () => {
                         await connector.resetPomodoroResting(activePomodoro.id)
                         await connector.resetPomodoro(activePomodoro.id)
                         activePomodoro = connector.getActivePomodoro()
-                    }} class="viewer-buttons"><img src="/images/forward.png" alt="Forward Button"/></button>
+                    }} class="viewer-buttons"><img src="{base}/images/forward.png" alt="Forward Button"/></button>
                 {/if}
             {:else}
                 <button class="viewer-buttons">
-                    <img src="/images/play_pause_active.png" alt="Play Button"/>
+                    <img src="{base}/images/play_pause_active.png" alt="Play Button"/>
                 </button>
             {/if}
         </div>
