@@ -39,7 +39,7 @@
     }
 
     function setActivePomodoro(pomodoro: Pomodoro){
-        setCookie(ACTIVE_POMODORO, JSON.stringify(pomodoro), 0)
+        setCookie(ACTIVE_POMODORO, JSON.stringify(pomodoro), 400)
     }
 </script>
 

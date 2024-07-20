@@ -44,8 +44,8 @@ export class Connector implements ConnectorInterface {
             }
             eraseCookie(SYSTEM)
             eraseCookie(ACTIVE_POMODORO)
-            setCookie(SYSTEM, JSON.stringify(response), 0)
-            setCookie(ACTIVE_POMODORO, JSON.stringify(data), 0)
+            setCookie(SYSTEM, JSON.stringify(response), 400)
+            setCookie(ACTIVE_POMODORO, JSON.stringify(data), 400)
             return response;
         })
         
@@ -97,8 +97,8 @@ export class Connector implements ConnectorInterface {
                     sys.pomodoros = [initialPomodoro]
                     return sys
                 }).then(res => {
-                    setCookie(SYSTEM, JSON.stringify(res), 0)
-                    setCookie(ACTIVE_POMODORO, JSON.stringify(res.pomodoros[0]), 0)
+                    setCookie(SYSTEM, JSON.stringify(res), 400)
+                    setCookie(ACTIVE_POMODORO, JSON.stringify(res.pomodoros[0]), 400)
                     return res
                 }))
             }
@@ -323,7 +323,7 @@ export class Connector implements ConnectorInterface {
     }
     
     saveSystem(data: System) : void{
-        setCookie(SYSTEM, JSON.stringify(data), 0)
+        setCookie(SYSTEM, JSON.stringify(data), 400)
     }
 }
 

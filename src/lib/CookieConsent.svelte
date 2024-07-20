@@ -12,13 +12,14 @@
     function acceptedCookies() : boolean {
         let consent: string | null = getCookie(COOKIE_CONSENT)
         if (consent){
+            setConsentCookies()
             return true
         }
         return false
     }
 
     function setConsentCookies() {
-        setCookie(COOKIE_CONSENT, "true", 0)
+        setCookie(COOKIE_CONSENT, "true", 400)
     }
 </script>
 <style>
