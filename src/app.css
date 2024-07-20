@@ -61,10 +61,11 @@
     font-family: 'Digimon World';
     font-style: normal;
     font-weight: 400;
-    src: local('Digimon World') format("opentype") url('https://vinicius-brito-costa.github.io/Digimon-Pomodoro/fonts/digimon-world.otf');
+    src: local('Digimon World') url('https://vinicius-brito-costa.github.io/Digimon-Pomodoro/fonts/digimon-world.otf') format("opentype") ;
 }
 
 body {
+    font-family: 'Digimon World';
 	min-height: 100vh;
 	margin: 0;
     box-sizing: border-box;
