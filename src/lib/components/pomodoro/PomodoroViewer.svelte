@@ -11,9 +11,22 @@
 
     const connector: ConnectorInterface = new Connector()
     let activePomodoro: Pomodoro | null = null
+    function notificationFunction(title: string, msg: string){
+        if(!("Notification" in window)){
+            throw new Error("Your browser does not support push notification");
+        }
+        Notification.requestPermission().then((Permission)=>{
+            const notificationOptions = {
+                body: msg,
+                icon:"/images/play_pause_active.png"
+            }
+            new Notification(title,notificationOptions);
+        })
+    };
 
     onMount(async () => {
         activePomodoro = connector.getActivePomodoro()
+        Notification.requestPermission()
     })
 
 
@@ -40,6 +53,7 @@
                                         }
                                         connector.saveSystem(system)
                                         callback(system)
+                                        notificationFunction("Focus time Finished!", "You current focus time has finished, please start the resting time.")
                                     }
                                 })
                             }
@@ -68,6 +82,7 @@
                     if(activePomodoro.pomodoro.resting.finished){
                         await connector.resetPomodoroResting(activePomodoro.id)
                         await connector.resetPomodoro(activePomodoro.id)
+                        notificationFunction("Resting time Finished!", "You current resting time has finished, please start the focus time.")
                     }
                     clearInterval(timer)
                 }
